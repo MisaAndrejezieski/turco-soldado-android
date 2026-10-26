@@ -1,0 +1,14 @@
+/app/build/
+.gradle/
+/build/
+.idea/
+captures/
+.DS_Store
+*.hprof
+*.lock
+/.gradle/9.6.0/checksums
+/.gradle/9.6.0
+/.gradle
+/.gradle
+.gradle/9.6.0/fileHashes/fileHashes.lock
+.idea/modules.xml

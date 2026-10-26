@@ -29,7 +29,7 @@ class TrucoViewModel : ViewModel() {
 
     fun initGame() {
         _state.value = GameState(
-            gameLog = listOf("Partida iniciada! Boa sorte no Truco Soldado.")
+            gameLog = listOf("Partida iniciada! Boa sorte no Truco Soldado (Regra do PR).")
         )
         startNewHand()
     }
@@ -59,6 +59,12 @@ class TrucoViewModel : ViewModel() {
 
         val newHandsPlayed = current.handsPlayed + 1
         checkEscuraConditions()
+
+        val maxScore = current.scores.maxOrNull() ?: 0
+        if (maxScore >= 5) {
+            val leaderId = current.scores.indexOf(maxScore)
+            logMessage("🤝 COALIZÃO ATIVADA: ${players[leaderId].name} (${maxScore} tentos) é o alvo! Os demais unem forças para sabotá-lo e buscar o Tapa na Vaca.")
+        }
 
         val deck = Card.createDeck().shuffled().toMutableList()
         val vira = deck.removeAt(deck.size - 1)
@@ -289,19 +295,35 @@ class TrucoViewModel : ViewModel() {
         playCard(aiId, cardIndex)
     }
 
+    /**
+     * Lógica Avançada de IA & Coalizão (Truco Soldado - PR):
+     * - Alvo Principal: Sabotagem implacável contra adversários avançados (5+, 8, 11 tentos) visando o Tapa na Vaca (0 tentos).
+     * - Cooperação Tática: Os oponentes se auxiliam para cobrir, bloquear e deixar o caminho livre para o aliado vencer a vaza em cima do alvo perigoso.
+     */
     private fun selectBestAICard(aiId: Int, hand: List<Card>): Int {
         val current = _state.value
         val manilha = current.manilhaRank ?: ""
         val played = current.trickPlayedCards
+        val scores = current.scores
 
+        // 1. Avaliar todas as cartas na mão (índice, carta, valor), ordenadas do menor para o maior
         val evaluated = hand.mapIndexed { index, card ->
             Triple(index, card, card.getCardValue(manilha))
         }.sortedBy { it.third }
 
-        if (played.isEmpty()) {
-            return evaluated[0].first
-        }
+        // 2. Identificar o Alvo Principal (adversário com maior pontuação e perigoso >= 5)
+        val opponents = (0..2).filter { it != aiId }
+        val targetPlayerId = opponents.maxByOrNull { scores[it] } ?: opponents.first()
+        val targetScore = scores[targetPlayerId]
+        val isTargetDangerous = targetScore >= 5
 
+        // Identificar o Aliado (o outro oponente não-alvo)
+        val allyPlayerId = opponents.firstOrNull { it != targetPlayerId } ?: -1
+
+        val playedPlayerIds = played.map { it.playerId }
+        val targetHasPlayed = playedPlayerIds.contains(targetPlayerId)
+
+        // Descobrir quem está ganhando a vaza até o momento
         var highestVal = -1
         var highestPlayer: Int? = null
         for (item in played) {
@@ -312,17 +334,66 @@ class TrucoViewModel : ViewModel() {
             }
         }
 
-        val isTargetLeading = highestPlayer != null && current.scores[highestPlayer] in 8..11
-        if (played.size == 1 && isTargetLeading) {
-            // Coalition: play weakest card
-            return evaluated[0].first
+        val winningCards = evaluated.filter { it.third > highestVal }
+
+        // ==========================================================
+        // CENÁRIO 1: IA abre a vaza (primeira a jogar)
+        // ==========================================================
+        if (played.isEmpty()) {
+            return if (isTargetDangerous && evaluated.last().third > 80) {
+                // Pressão agressiva com carta forte se o alvo for perigoso
+                evaluated.last().first
+            } else if (isTargetDangerous) {
+                // Poupar cartas fortes, saindo com carta intermediária/baixa
+                evaluated[evaluated.size / 2].first
+            } else {
+                evaluated[evaluated.size / 2].first
+            }
         }
 
-        val winningCards = evaluated.filter { it.third > highestVal }
+        // ==========================================================
+        // CENÁRIO 2: O Alvo Perigoso está ganhando a vaza
+        // ==========================================================
+        if (highestPlayer == targetPlayerId) {
+            // SABOTAGEM TOTAL: Tentar roubar a vaza do alvo a todo custo
+            return if (winningCards.isNotEmpty()) {
+                winningCards.first().first // Menor carta vencedora para bloquear o alvo
+            } else {
+                evaluated.first().first // Sem carta vencedora, descarta a menor
+            }
+        }
+
+        // ==========================================================
+        // CENÁRIO 3: O Aliado (outro oponente) está ganhando a vaza
+        // ==========================================================
+        if (highestPlayer != null && highestPlayer == allyPlayerId && isTargetDangerous) {
+            // COOPERAÇÃO TÁTICA: Deixar o aliado vencer para barrar o alvo perigoso
+            return if (targetHasPlayed) {
+                val targetCardVal = played.firstOrNull { it.playerId == targetPlayerId }?.card?.getCardValue(manilha) ?: 0
+                if (targetCardVal < highestVal) {
+                    // Alvo já jogou e não pode vencer o aliado -> Proteger a vitória do aliado descartando carta baixa!
+                    evaluated.first().first
+                } else {
+                    // Alvo pode ameaçar -> Garantir com carta vencedora se necessário
+                    if (winningCards.isNotEmpty()) winningCards.first().first else evaluated.first().first
+                }
+            } else {
+                // Alvo ainda não jogou (joga por último). Se tiver carta muito forte, assegurar; senão, poupar.
+                if (winningCards.isNotEmpty() && evaluated.last().third > 85) {
+                    winningCards.last().first
+                } else {
+                    evaluated.first().first
+                }
+            }
+        }
+
+        // ==========================================================
+        // CENÁRIO 4: Jogada padrão otimizada
+        // ==========================================================
         return if (winningCards.isNotEmpty()) {
-            winningCards[0].first
+            winningCards.first().first
         } else {
-            evaluated[0].first
+            evaluated.first().first
         }
     }
 

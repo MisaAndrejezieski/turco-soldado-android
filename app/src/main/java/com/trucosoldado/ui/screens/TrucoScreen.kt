@@ -3,15 +3,12 @@ package com.trucosoldado.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.trucosoldado.model.Player
 import com.trucosoldado.ui.components.CardItemView
 import com.trucosoldado.viewmodel.TrucoViewModel
 
@@ -38,15 +36,15 @@ fun TrucoScreen(viewModel: TrucoViewModel) {
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.SpaceBetween
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // HEADER
+            // HEADER PRINCIPAL (TOPO)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(Color(0xCC064E3B), RoundedCornerShape(16.dp))
                     .border(1.dp, Color(0x88047857), RoundedCornerShape(16.dp))
-                    .padding(10.dp),
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -64,218 +62,215 @@ fun TrucoScreen(viewModel: TrucoViewModel) {
                             text = "TRUCO SOLDADO",
                             color = Color(0xFFFBBF24),
                             fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
+                            fontSize = 15.sp
                         )
                         Text(
-                            text = "Regra do Sul (PR) • 1ª: 3t, 2ª: 2t, 3ª: 1t",
+                            text = "• Regra • 1ª: 3t, 2ª: 2t, 3ª: 1t",
                             color = Color(0xFFA7F3D0),
-                            fontSize = 10.sp
+                            fontSize = 9.sp
                         )
                     }
                 }
 
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     Button(
                         onClick = { viewModel.setRulesModalOpen(true) },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD97706)),
-                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                        modifier = Modifier.height(32.dp)
                     ) {
-                        Icon(Icons.Default.Book, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Regras", fontSize = 12.sp)
+                        Icon(Icons.Default.Book, contentDescription = null, modifier = Modifier.size(12.dp))
+                        Spacer(modifier = Modifier.width(2.dp))
+                        Text("Regras", fontSize = 10.sp)
                     }
                     Button(
                         onClick = { viewModel.resetGame() },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB91C1C)),
-                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                        modifier = Modifier.height(32.dp)
                     ) {
-                        Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Reiniciar", fontSize = 12.sp)
+                        Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(12.dp))
+                        Spacer(modifier = Modifier.width(2.dp))
+                        Text("Reiniciar", fontSize = 10.sp)
                     }
                 }
             }
 
-            // MAIN TABLE AREA
+            // MESA DE FELTRO (ÁREA CENTRAL DO JOGO) - OCUPA O ESPAÇO FLEXÍVEL (WEIGHT 1F)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
-                    .padding(vertical = 4.dp)
                     .background(
                         brush = Brush.radialGradient(
                             colors = listOf(Color(0xFF1E4D2B), Color(0xFF0D2916), Color(0xFF05140A))
                         ),
-                        shape = RoundedCornerShape(32.dp)
+                        shape = RoundedCornerShape(24.dp)
                     )
-                    .border(8.dp, Color(0xFF2D1806), RoundedCornerShape(32.dp)),
-                contentAlignment = Alignment.Center
+                    .border(6.dp, Color(0xFF2D1806), RoundedCornerShape(24.dp))
+                    .padding(10.dp)
             ) {
-                // Global Escura Badge
+                // Indicador de Escura Global (Topo Central)
                 if (state.isGlobalEscura) {
                     Box(
                         modifier = Modifier
                             .align(Alignment.TopCenter)
-                            .padding(top = 12.dp)
-                            .background(Color(0xE6581C87), RoundedCornerShape(50.dp))
-                            .border(2.dp, Color(0xFFC084FC), RoundedCornerShape(50.dp))
-                            .padding(horizontal = 12.dp, vertical = 4.dp)
+                            .background(Color(0xEE581C87), RoundedCornerShape(50.dp))
+                            .border(1.dp, Color(0xFFC084FC), RoundedCornerShape(50.dp))
+                            .padding(horizontal = 10.dp, vertical = 2.dp)
                     ) {
                         Text(
                             text = "👁️ Mão na Escura Global!",
                             color = Color(0xFFE9D5FF),
-                            fontSize = 11.sp,
+                            fontSize = 9.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
                 }
 
-                // AI 1 (Top Left)
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(44.dp)
-                            .background(
-                                color = Color(0xFF1E293B),
-                                shape = CircleShape
-                            )
-                            .border(
-                                width = if (state.turnPlayer == 1) 3.dp else 2.dp,
-                                color = if (state.turnPlayer == 1) Color(0xFFFBBF24) else Color(0xFF475569),
-                                shape = CircleShape
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("🐗", fontSize = 22.sp)
-                    }
-                    Text(players[1].name, color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text("⭐ ${state.scores[1]}", color = Color(0xFFFBBF24), fontSize = 10.sp)
-                        Text("|", color = Color.Gray, fontSize = 10.sp)
-                        Text("💀 ${state.resets[1]}", color = Color(0xFFEF4444), fontSize = 10.sp)
-                    }
-                    Row(modifier = Modifier.padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy((-16).dp)) {
-                        repeat(state.playerHands.getOrNull(1)?.size ?: 0) {
-                            CardItemView(card = null, isBack = true)
-                        }
-                    }
+                // --- PORCO 2 (IA 1 - TOPO ESQUERDA) ---
+                Box(modifier = Modifier.align(Alignment.TopStart)) {
+                    OpponentTableSection(
+                        player = players[1],
+                        score = state.scores[1],
+                        resets = state.resets[1],
+                        handSize = state.playerHands.getOrNull(1)?.size ?: 0,
+                        isTurn = state.turnPlayer == 1
+                    )
                 }
 
-                // AI 2 (Top Right)
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(44.dp)
-                            .background(
-                                color = Color(0xFF1E293B),
-                                shape = CircleShape
-                            )
-                            .border(
-                                width = if (state.turnPlayer == 2) 3.dp else 2.dp,
-                                color = if (state.turnPlayer == 2) Color(0xFFFBBF24) else Color(0xFF475569),
-                                shape = CircleShape
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("🐗", fontSize = 22.sp)
-                    }
-                    Text(players[2].name, color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text("⭐ ${state.scores[2]}", color = Color(0xFFFBBF24), fontSize = 10.sp)
-                        Text("|", color = Color.Gray, fontSize = 10.sp)
-                        Text("💀 ${state.resets[2]}", color = Color(0xFFEF4444), fontSize = 10.sp)
-                    }
-                    Row(modifier = Modifier.padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy((-16).dp)) {
-                        repeat(state.playerHands.getOrNull(2)?.size ?: 0) {
-                            CardItemView(card = null, isBack = true)
-                        }
-                    }
+                // --- PORCO 3 (IA 2 - TOPO DIREITA) ---
+                Box(modifier = Modifier.align(Alignment.TopEnd)) {
+                    OpponentTableSection(
+                        player = players[2],
+                        score = state.scores[2],
+                        resets = state.resets[2],
+                        handSize = state.playerHands.getOrNull(2)?.size ?: 0,
+                        isTurn = state.turnPlayer == 2
+                    )
                 }
 
-                // CENTER: VIRA, DECK & PLAYED CARDS
-                Row(
+                // --- CENTRO DA MESA: BADGE DA VAZA, DECK, VIRA E CARTAS JOGADAS ---
+                Column(
                     modifier = Modifier.align(Alignment.Center),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    // Deck & Vira
-                    Row(horizontalArrangement = Arrangement.spacedBy((-12).dp)) {
-                        CardItemView(card = null, isBack = true)
-                        state.vira?.let { viraCard ->
-                            CardItemView(
-                                card = viraCard,
-                                isManilha = false
-                            )
-                        }
+                    // Badge da Vaza Atual
+                    val points = when (state.currentTrick) {
+                        0 -> 3
+                        1 -> 2
+                        else -> 1
+                    }
+                    Box(
+                        modifier = Modifier
+                            .background(Color(0xCC064E3B), RoundedCornerShape(50.dp))
+                            .border(1.dp, Color(0xFF10B981), RoundedCornerShape(50.dp))
+                            .padding(horizontal = 10.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = "VAZA ${state.currentTrick + 1}: VALE $points ${if (points == 1) "TENTO" else "TENTOS"}",
+                            color = Color(0xFFFBBF24),
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
 
-                    // Played Trick Cards & Badge
+                    // Deck, Vira e Cartas Jogadas na Mesa
                     Box(
-                        modifier = Modifier.size(160.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(100.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        val points = when (state.currentTrick) {
-                            0 -> 3
-                            1 -> 2
-                            else -> 1
-                        }
-                        Box(
+                        // 1. Deck e Vira (Lado Esquerdo do Centro)
+                        Row(
                             modifier = Modifier
-                                .align(Alignment.TopCenter)
-                                .background(Color(0xCC064E3B), RoundedCornerShape(50.dp))
-                                .border(1.dp, Color(0xFF10B981), RoundedCornerShape(50.dp))
-                                .padding(horizontal = 8.dp, vertical = 2.dp)
+                                .align(Alignment.CenterStart)
+                                .padding(start = 4.dp),
+                            horizontalArrangement = Arrangement.spacedBy((-14).dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                text = "VAZA ${state.currentTrick + 1}: VALE $points TENTOS",
-                                color = Color(0xFFFBBF24),
-                                fontSize = 9.sp,
-                                fontWeight = FontWeight.Bold
-                            )
+                            // Verso do Baralho
+                            Box(
+                                modifier = Modifier
+                                    .width(38.dp)
+                                    .height(54.dp)
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .background(Brush.linearGradient(listOf(Color(0xFFF472B6), Color(0xFFDB2777))))
+                                    .border(1.dp, Color(0xFFFBCFE8), RoundedCornerShape(6.dp)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text("🐷", fontSize = 12.sp)
+                            }
+                            // Carta Vira
+                            state.vira?.let { viraCard ->
+                                Box(
+                                    modifier = Modifier
+                                        .size(width = 38.dp, height = 54.dp)
+                                ) {
+                                    CardItemView(card = viraCard, isManilha = false)
+                                }
+                            }
                         }
 
-                        // Render played cards on center
-                        state.trickPlayedCards.forEach { played ->
-                            val alignment = when (played.playerId) {
-                                0 -> Alignment.BottomCenter
-                                1 -> Alignment.CenterStart
-                                else -> Alignment.CenterEnd
+                        // 2. Cartas Jogadas na Vaza
+                        val p0Played = state.trickPlayedCards.find { it.playerId == 0 }
+                        val p1Played = state.trickPlayedCards.find { it.playerId == 1 }
+                        val p2Played = state.trickPlayedCards.find { it.playerId == 2 }
+
+                        if (p1Played != null) {
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                                    .offset(x = (-30).dp, y = (-12).dp)
+                                    .size(width = 42.dp, height = 58.dp)
+                            ) {
+                                CardItemView(card = p1Played.card, isManilha = p1Played.card.rank == state.manilhaRank)
                             }
-                            Box(modifier = Modifier.align(alignment)) {
-                                CardItemView(
-                                    card = played.card,
-                                    isManilha = played.card.rank == state.manilhaRank
-                                )
+                        }
+
+                        if (p2Played != null) {
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                                    .offset(x = 30.dp, y = (-12).dp)
+                                    .size(width = 42.dp, height = 58.dp)
+                            ) {
+                                CardItemView(card = p2Played.card, isManilha = p2Played.card.rank == state.manilhaRank)
+                            }
+                        }
+
+                        if (p0Played != null) {
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                                    .offset(y = 16.dp)
+                                    .size(width = 42.dp, height = 58.dp)
+                            ) {
+                                CardItemView(card = p0Played.card, isManilha = p0Played.card.rank == state.manilhaRank)
                             }
                         }
                     }
                 }
+            }
 
-                // HUMAN PLAYER (Bottom Center)
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(bottom = 8.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+            // --- JOGADOR HUMANO (PORCO 1 - BASE DA TELA, FORA DA MESA) ---
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                // Cartas na mão do jogador humano
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Human Hand Cards
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.padding(bottom = 6.dp)
-                    ) {
-                        val humanHand = state.playerHands.getOrNull(0) ?: emptyList()
-                        val isEscura = state.isGlobalEscura || state.individualEscura[0]
-                        humanHand.forEachIndexed { index, card ->
+                    val humanHand = state.playerHands.getOrNull(0) ?: emptyList()
+                    val isEscura = state.isGlobalEscura || state.individualEscura[0]
+
+                    humanHand.forEachIndexed { index, card ->
+                        Box(modifier = Modifier.size(width = 52.dp, height = 74.dp)) {
                             CardItemView(
                                 card = if (isEscura) null else card,
                                 isManilha = card.rank == state.manilhaRank,
@@ -288,104 +283,79 @@ fun TrucoScreen(viewModel: TrucoViewModel) {
                             )
                         }
                     }
+                }
 
-                    // Human Info Bar
+                // Painel de Informações e Botão Nova Mão
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xE60F172A), RoundedCornerShape(14.dp))
+                        .border(
+                            width = if (state.turnPlayer == 0) 2.dp else 1.dp,
+                            color = if (state.turnPlayer == 0) Color(0xFFFBBF24) else Color(0x6610B981),
+                            shape = RoundedCornerShape(14.dp)
+                        )
+                        .padding(horizontal = 10.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
                     Row(
-                        modifier = Modifier
-                            .background(Color(0xE60F172A), RoundedCornerShape(16.dp))
-                            .border(1.dp, Color(0x6610B981), RoundedCornerShape(16.dp))
-                            .padding(horizontal = 12.dp, vertical = 6.dp),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(36.dp)
+                                .size(30.dp)
                                 .background(Color(0xFF047857), CircleShape)
-                                .border(
-                                    width = if (state.turnPlayer == 0) 3.dp else 2.dp,
-                                    color = if (state.turnPlayer == 0) Color(0xFFFBBF24) else Color(0xFF10B981),
-                                    shape = CircleShape
-                                ),
+                                .border(1.dp, Color(0xFFFBBF24), CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text("👑", fontSize = 18.sp)
+                            Text("👑", fontSize = 14.sp)
                         }
                         Column {
-                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-                                Text("Porco 1 (Você)", color = Color(0xFFFBBF24), fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                            Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
+                                Text("Porco 1 (Você)", color = Color(0xFFFBBF24), fontWeight = FontWeight.Bold, fontSize = 11.sp)
                                 if (state.individualEscura[0]) {
                                     Box(
                                         modifier = Modifier
                                             .background(Color(0xFF7E22CE), RoundedCornerShape(4.dp))
-                                            .padding(horizontal = 4.dp, vertical = 1.dp)
+                                            .padding(horizontal = 3.dp, vertical = 1.dp)
                                     ) {
-                                        Text("ESCURA", color = Color(0xFFE9D5FF), fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                                        Text("ESCURA", color = Color(0xFFE9D5FF), fontSize = 7.sp, fontWeight = FontWeight.Bold)
                                     }
                                 }
                             }
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Text("Tentos: ${state.scores[0]}/12", color = Color(0xFFFBBF24), fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                                Text("Estouros: ${state.resets[0]}", color = Color(0xFFEF4444), fontSize = 11.sp)
+                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                Text("Tentos: ${state.scores[0]}/12", color = Color(0xFFFBBF24), fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                Text("Estouros: ${state.resets[0]}", color = Color(0xFFEF4444), fontSize = 10.sp)
                             }
                         }
                     }
-                }
-            }
 
-            // FOOTER: LOG & NEXT HAND BUTTON
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(64.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                // Game Log
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .background(Color(0xE6064E3B), RoundedCornerShape(12.dp))
-                        .border(1.dp, Color(0x66047857), RoundedCornerShape(12.dp))
-                        .padding(8.dp)
-                ) {
-                    val logList = state.gameLog
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(2.dp)
+                    Button(
+                        onClick = { viewModel.startNewHand() },
+                        enabled = !state.isHandInProgress && state.matchWinner == null,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFEAB308),
+                            disabledContainerColor = Color(0x44EAB308)
+                        ),
+                        shape = RoundedCornerShape(10.dp),
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                        modifier = Modifier.height(34.dp)
                     ) {
-                        items(logList) { logMsg ->
-                            Text(
-                                text = logMsg,
-                                color = Color(0xFFA7F3D0),
-                                fontSize = 10.sp
-                            )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(3.dp)
+                        ) {
+                            Icon(Icons.Default.PlayArrow, contentDescription = null, tint = Color.Black, modifier = Modifier.size(12.dp))
+                            Text("NOVA MÃO", color = Color.Black, fontWeight = FontWeight.Black, fontSize = 10.sp)
                         }
-                    }
-                }
-
-                // Next Hand Button
-                Button(
-                    onClick = { viewModel.startNewHand() },
-                    enabled = !state.isHandInProgress && state.matchWinner == null,
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .width(130.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFEAB308),
-                        disabledContainerColor = Color(0x44EAB308)
-                    ),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(Icons.Default.PlayArrow, contentDescription = null, tint = Color.Black)
-                        Text("NOVA MÃO", color = Color.Black, fontWeight = FontWeight.Black, fontSize = 12.sp)
                     }
                 }
             }
         }
 
-        // RULES MODAL
+        // --- MODAL DE REGRAS ---
         if (state.showRulesModal) {
             AlertDialog(
                 onDismissRequest = { viewModel.setRulesModalOpen(false) },
@@ -407,22 +377,22 @@ fun TrucoScreen(viewModel: TrucoViewModel) {
             )
         }
 
-        // SLAP OVERLAY (TAPA NA VACA)
+        // --- OVERLAY TAPA NA VACA ---
         if (state.showSlapOverlay) {
             AlertDialog(
                 onDismissRequest = {},
-                title = { Text("👋 TAPA NA VACA!", color = Color(0xFFEF4444), fontWeight = FontWeight.Black, fontSize = 22.sp) },
+                title = { Text("👋 TAPA NA VACA!", color = Color(0xFFEF4444), fontWeight = FontWeight.Black, fontSize = 20.sp) },
                 text = {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("🐮", fontSize = 50.sp)
-                        Spacer(modifier = Modifier.height(8.dp))
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                        Text("🐮", fontSize = 42.sp)
+                        Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "${state.punishedPlayersOnEnd.joinToString(" e ")} terminou com 0 tentos!",
                             color = Color(0xFFFBBF24),
                             fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp
+                            fontSize = 13.sp
                         )
-                        Text("Castigo por terminar a partida zerado!", color = Color.LightGray, fontSize = 11.sp)
+                        Text("Castigo por terminar a partida zerado!", color = Color.LightGray, fontSize = 10.sp)
                     }
                 },
                 confirmButton = {
@@ -434,17 +404,17 @@ fun TrucoScreen(viewModel: TrucoViewModel) {
             )
         }
 
-        // VICTORY OVERLAY
+        // --- OVERLAY DE VITÓRIA ---
         if (state.showVictoryOverlay) {
             val winnerName = state.matchWinner?.let { players[it].name } ?: ""
             AlertDialog(
                 onDismissRequest = {},
-                title = { Text("🏆 GRANDE VENCEDOR!", color = Color(0xFFFBBF24), fontWeight = FontWeight.Black, fontSize = 22.sp) },
+                title = { Text("🏆 GRANDE VENCEDOR!", color = Color(0xFFFBBF24), fontWeight = FontWeight.Black, fontSize = 20.sp) },
                 text = {
-                    Column(verticalAlignment = Arrangement.spacedBy(8.dp)) {
-                        Text("$winnerName cravou 12 tentos na partida!", color = Color(0xFFA7F3D0), fontWeight = FontWeight.Bold)
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text("$winnerName cravou 12 tentos na partida!", color = Color(0xFFA7F3D0), fontWeight = FontWeight.Bold, fontSize = 12.sp)
                         Divider(color = Color(0xFF064E3B))
-                        Text("PLACAR FINAL:", color = Color(0xFFFBBF24), fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                        Text("PLACAR FINAL:", color = Color(0xFFFBBF24), fontWeight = FontWeight.Bold, fontSize = 11.sp)
                         repeat(3) { i ->
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                                 Text(players[i].name, color = Color.White, fontSize = 11.sp)
@@ -461,5 +431,72 @@ fun TrucoScreen(viewModel: TrucoViewModel) {
                 containerColor = Color(0xFF064E3B)
             )
         }
+    }
+}
+
+@Composable
+fun OpponentTableSection(
+    player: Player,
+    score: Int,
+    resets: Int,
+    handSize: Int,
+    isTurn: Boolean
+) {
+    Column(
+        modifier = Modifier
+            .background(Color(0xCC064E3B), RoundedCornerShape(12.dp))
+            .border(
+                width = if (isTurn) 2.dp else 1.dp,
+                color = if (isTurn) Color(0xFFFBBF24) else Color(0x66047857),
+                shape = RoundedCornerShape(12.dp)
+            )
+            .padding(6.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(28.dp)
+                    .background(Color(0xFF1E293B), CircleShape)
+                    .border(2.dp, if (isTurn) Color(0xFFFBBF24) else Color(0xFF475569), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("🐗", fontSize = 14.sp)
+            }
+            Column {
+                Text(player.name, color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text("⭐ $score", color = Color(0xFFFBBF24), fontSize = 9.sp)
+                    Text("💀 $resets", color = Color(0xFFEF4444), fontSize = 9.sp)
+                }
+            }
+        }
+
+        Row(
+            modifier = Modifier.padding(top = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy((-8).dp)
+        ) {
+            repeat(handSize) {
+                OpponentCardBack()
+            }
+        }
+    }
+}
+
+@Composable
+fun OpponentCardBack() {
+    Box(
+        modifier = Modifier
+            .width(26.dp)
+            .height(38.dp)
+            .clip(RoundedCornerShape(4.dp))
+            .background(Brush.linearGradient(listOf(Color(0xFFF472B6), Color(0xFFDB2777))))
+            .border(1.dp, Color(0xFFFBCFE8), RoundedCornerShape(4.dp)),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(text = "🐷", fontSize = 10.sp)
     }
 }
