@@ -21,6 +21,12 @@ android {
         }
     }
 
+    signingConfigs {
+        named("debug") {
+            storeFile = file("${System.getProperty("user.home")}/.android/debug.keystore")
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false

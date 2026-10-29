@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.trucosoldado.model.Card
 import com.trucosoldado.model.Player
 import com.trucosoldado.ui.components.CardItemView
 import com.trucosoldado.viewmodel.TrucoViewModel
@@ -73,6 +74,19 @@ fun TrucoScreen(viewModel: TrucoViewModel) {
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    val maxOpponentScore = listOf(state.scores[1], state.scores[2]).maxOrNull() ?: 0
+                    if (maxOpponentScore >= 5) {
+                        val targetId = if (state.scores[1] >= state.scores[2]) 1 else 2
+                        val allyId = if (targetId == 1) 2 else 1
+                        Button(
+                            onClick = { viewModel.toggleShowAllyHand() },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7C3AED)),
+                            contentPadding = PaddingValues(horizontal = 6.dp, vertical = 4.dp),
+                            modifier = Modifier.height(32.dp)
+                        ) {
+                            Text(if (state.showAllyHand) "Ocultar Aliado" else "🤝 Ver ${players[allyId].name.substringBefore(" ")}", fontSize = 9.sp)
+                        }
+                    }
                     Button(
                         onClick = { viewModel.setRulesModalOpen(true) },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD97706)),
@@ -128,14 +142,39 @@ fun TrucoScreen(viewModel: TrucoViewModel) {
                     }
                 }
 
+                // Balão de Fala / Taunt
+                state.activeTaunt?.let { taunt ->
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .offset(y = 28.dp)
+                            .background(Color(0xFFDC2626), RoundedCornerShape(12.dp))
+                            .border(2.dp, Color(0xFFFBBF24), RoundedCornerShape(12.dp))
+                            .padding(horizontal = 10.dp, vertical = 3.dp)
+                    ) {
+                        Text(
+                            text = "🗣️ \"$taunt\"",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 11.sp
+                        )
+                    }
+                }
+
+                val maxOpponentScore = listOf(state.scores[1], state.scores[2]).maxOrNull() ?: 0
+                val targetId = if (state.scores[1] >= state.scores[2]) 1 else 2
+                val allyId = if (targetId == 1) 2 else 1
+
                 // --- PORCO 2 (IA 1 - TOPO ESQUERDA) ---
                 Box(modifier = Modifier.align(Alignment.TopStart)) {
                     OpponentTableSection(
                         player = players[1],
                         score = state.scores[1],
                         resets = state.resets[1],
-                        handSize = state.playerHands.getOrNull(1)?.size ?: 0,
-                        isTurn = state.turnPlayer == 1
+                        hand = state.playerHands.getOrNull(1),
+                        isTurn = state.turnPlayer == 1,
+                        showCards = state.showAllyHand && allyId == 1,
+                        manilhaRank = state.manilhaRank
                     )
                 }
 
@@ -145,8 +184,10 @@ fun TrucoScreen(viewModel: TrucoViewModel) {
                         player = players[2],
                         score = state.scores[2],
                         resets = state.resets[2],
-                        handSize = state.playerHands.getOrNull(2)?.size ?: 0,
-                        isTurn = state.turnPlayer == 2
+                        hand = state.playerHands.getOrNull(2),
+                        isTurn = state.turnPlayer == 2,
+                        showCards = state.showAllyHand && allyId == 2,
+                        manilhaRank = state.manilhaRank
                     )
                 }
 
@@ -439,8 +480,10 @@ fun OpponentTableSection(
     player: Player,
     score: Int,
     resets: Int,
-    handSize: Int,
-    isTurn: Boolean
+    hand: List<Card>?,
+    isTurn: Boolean,
+    showCards: Boolean,
+    manilhaRank: String?
 ) {
     Column(
         modifier = Modifier
@@ -477,10 +520,18 @@ fun OpponentTableSection(
 
         Row(
             modifier = Modifier.padding(top = 4.dp),
-            horizontalArrangement = Arrangement.spacedBy((-8).dp)
+            horizontalArrangement = Arrangement.spacedBy(if (showCards) 2.dp else (-8).dp)
         ) {
-            repeat(handSize) {
-                OpponentCardBack()
+            if (showCards && hand != null) {
+                hand.forEach { card ->
+                    Box(modifier = Modifier.size(width = 28.dp, height = 40.dp)) {
+                        CardItemView(card = card, isManilha = card.rank == manilhaRank)
+                    }
+                }
+            } else {
+                repeat(hand?.size ?: 0) {
+                    OpponentCardBack()
+                }
             }
         }
     }

@@ -21,7 +21,7 @@ data class Card(
     }
 
     companion object {
-        val RANK_ORDER = listOf("4", "5", "6", "7", "Q", "J", "K", "2", "3")
+        val RANK_ORDER = listOf("4", "5", "6", "7", "Q", "J", "K", "A", "2", "3")
 
         fun createDeck(): List<Card> {
             val deck = mutableListOf<Card>()

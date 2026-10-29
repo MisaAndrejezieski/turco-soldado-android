@@ -204,10 +204,25 @@ class TrucoViewModel : ViewModel() {
 
     private fun addPointsAndCheckBust(playerId: Int, points: Int) {
         val current = _state.value
+        val oldScore = current.scores[playerId]
         val scores = current.scores.toMutableList()
         val resets = current.resets.toMutableList()
 
         scores[playerId] += points
+        val newScore = scores[playerId]
+
+        var taunt: String? = null
+        if (oldScore == 0 && newScore > 0 && newScore < 12) {
+            taunt = "PENSO, NÉ!"
+            logMessage("💡 ${players[playerId].name}: \"PENSO, NÉ!\" (Salvou-se do zero!)")
+        }
+        if (newScore == 4) {
+            taunt = "KUAK!"
+            logMessage("🐷 ${players[playerId].name}: \"KUAK!\"")
+        } else if (listOf(5, 8, 10, 11).contains(newScore)) {
+            taunt = "SE FUDEU!"
+            logMessage("🔥 ${players[playerId].name}: \"SE FUDEU!\" (Chegou em $newScore tentos!)")
+        }
 
         if (scores[playerId] >= 13) {
             scores[playerId] = 0
@@ -218,8 +233,12 @@ class TrucoViewModel : ViewModel() {
         }
 
         _state.update {
-            it.copy(scores = scores, resets = resets)
+            it.copy(scores = scores, resets = resets, activeTaunt = taunt)
         }
+    }
+
+    fun toggleShowAllyHand() {
+        _state.update { it.copy(showAllyHand = !it.showAllyHand) }
     }
 
     private fun finishHand() {
