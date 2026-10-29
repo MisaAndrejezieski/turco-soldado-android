@@ -39,6 +39,9 @@ data class GameState(
     val showRulesModal: Boolean = false,
     val showAllyHand: Boolean = false,
     val showNannyIcon: Boolean = false,
+    val showSetupDialog: Boolean = false,
+    val playerName: String = "MISA",
+    val playerAvatar: String = "🐢🧘",
     val activeTaunt: String? = null,
     val currentAnnouncement: String? = null,
     

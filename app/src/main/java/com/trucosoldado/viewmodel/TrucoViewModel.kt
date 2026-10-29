@@ -17,11 +17,12 @@ class TrucoViewModel : ViewModel() {
     private val _state = MutableStateFlow(GameState())
     val state: StateFlow<GameState> = _state.asStateFlow()
 
-    val players = listOf(
-        Player(0, "MISA (Você)", false),
-        Player(1, "ADRIANO", true),
-        Player(2, "RICHARD", true)
-    )
+    val players: List<Player>
+        get() = listOf(
+            Player(0, "${_state.value.playerName} (Você)", false),
+            Player(1, "ADRIANO", true),
+            Player(2, "RICHARD", true)
+        )
 
     init {
         initGame()
@@ -40,6 +41,15 @@ class TrucoViewModel : ViewModel() {
 
     fun setRulesModalOpen(open: Boolean) {
         _state.update { it.copy(showRulesModal = open) }
+    }
+
+    fun setSetupDialogVisible(visible: Boolean) {
+        _state.update { it.copy(showSetupDialog = visible) }
+    }
+
+    fun updatePlayerConfig(name: String, avatar: String) {
+        _state.update { it.copy(playerName = name, playerAvatar = avatar, showSetupDialog = false) }
+        logMessage("👤 Perfil configurado: $name ($avatar)")
     }
 
     fun dismissSlapOverlay() {

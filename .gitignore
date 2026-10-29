@@ -1,14 +1,49 @@
-/app/build/
+# Built application files
+*.apk
+*.ap_
+*.aab
+
+# Files for the Dalvik VM
+*.dex
+
+# Java class files
+*.class
+
+# Generated files
+bin/
+gen/
+out/
+
+# Gradle files
 .gradle/
-/build/
+build/
+app/build/
+
+# Local configuration file (sdk.dir, etc.)
+local.properties
+
+# Eclipse project files
+.project
+.classpath
+.settings/
+
+# IntelliJ / Android Studio project files
 .idea/
+*.iml
+*.iws
+*.ipr
+
+# Captures from the android studio profiler
 captures/
+
+# OS and cache files
 .DS_Store
+*.pyc
 *.hprof
 *.lock
-/.gradle/9.6.0/checksums
-/.gradle/9.6.0
-/.gradle
-/.gradle
-.gradle/9.6.0/fileHashes/fileHashes.lock
-.idea/modules.xml
+
+# Local overrides, artifacts, and SDK homes
+ANDROID_SDK_HOME/
+app/ANDROID_SDK_HOME/
+.kotlin/
+.artifacts/
