@@ -142,22 +142,43 @@ fun TrucoScreen(viewModel: TrucoViewModel) {
                     }
                 }
 
-                // Balão de Fala / Taunt
+                // Balão de Fala / Taunt & Nanny Icon
                 state.activeTaunt?.let { taunt ->
-                    Box(
+                    Column(
                         modifier = Modifier
                             .align(Alignment.TopCenter)
-                            .offset(y = 28.dp)
-                            .background(Color(0xFFDC2626), RoundedCornerShape(12.dp))
-                            .border(2.dp, Color(0xFFFBBF24), RoundedCornerShape(12.dp))
-                            .padding(horizontal = 10.dp, vertical = 3.dp)
+                            .offset(y = 28.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        Text(
-                            text = "🗣️ \"$taunt\"",
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 11.sp
-                        )
+                        Box(
+                            modifier = Modifier
+                                .background(Color(0xFFDC2626), RoundedCornerShape(12.dp))
+                                .border(2.dp, Color(0xFFFBBF24), RoundedCornerShape(12.dp))
+                                .padding(horizontal = 10.dp, vertical = 3.dp)
+                        ) {
+                            Text(
+                                text = "🗣️ \"$taunt\"",
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 11.sp
+                            )
+                        }
+                        if (state.showNannyIcon) {
+                            Box(
+                                modifier = Modifier
+                                    .background(Color(0xFF047857), RoundedCornerShape(50.dp))
+                                    .border(1.dp, Color(0xFFFBBF24), RoundedCornerShape(50.dp))
+                                    .padding(horizontal = 8.dp, vertical = 2.dp)
+                            ) {
+                                Text(
+                                    text = "👩‍🍼 🐷 (Babá de Salvação!)",
+                                    color = Color(0xFFFBBF24),
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 9.sp
+                                )
+                            }
+                        }
                     }
                 }
 
@@ -347,15 +368,15 @@ fun TrucoScreen(viewModel: TrucoViewModel) {
                         Box(
                             modifier = Modifier
                                 .size(30.dp)
-                                .background(Color(0xFF047857), CircleShape)
+                                .background(Color(0xFFEC4899), CircleShape)
                                 .border(1.dp, Color(0xFFFBBF24), CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text("👑", fontSize = 14.sp)
+                            Text("🐢🧘", fontSize = 12.sp)
                         }
                         Column {
                             Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
-                                Text("Porco 1 (Você)", color = Color(0xFFFBBF24), fontWeight = FontWeight.Bold, fontSize = 11.sp)
+                                Text("MISA (Você)", color = Color(0xFFFBBF24), fontWeight = FontWeight.Bold, fontSize = 11.sp)
                                 if (state.individualEscura[0]) {
                                     Box(
                                         modifier = Modifier

@@ -18,9 +18,9 @@ class TrucoViewModel : ViewModel() {
     val state: StateFlow<GameState> = _state.asStateFlow()
 
     val players = listOf(
-        Player(0, "Porco 1 (Você)", false),
-        Player(1, "Porco 2 (IA 1)", true),
-        Player(2, "Porco 3 (IA 2)", true)
+        Player(0, "MISA (Você)", false),
+        Player(1, "ADRIANO", true),
+        Player(2, "RICHARD", true)
     )
 
     init {
@@ -60,6 +60,12 @@ class TrucoViewModel : ViewModel() {
         val newHandsPlayed = current.handsPlayed + 1
         checkEscuraConditions()
 
+        var taunt: String? = null
+        if (newHandsPlayed % 2 == 1) {
+            taunt = "GARANTI O CARTIADO, NÉ!"
+            logMessage("🖤 ADRIANO: \"GARANTI O CARTIADO, NÉ!\"")
+        }
+
         val maxScore = current.scores.maxOrNull() ?: 0
         if (maxScore >= 5) {
             val leaderId = current.scores.indexOf(maxScore)
@@ -90,7 +96,9 @@ class TrucoViewModel : ViewModel() {
                 trickPlayedCards = emptyList(),
                 trickWinners = emptyList(),
                 isHandInProgress = true,
-                isProcessingTrick = false
+                isProcessingTrick = false,
+                activeTaunt = taunt,
+                showNannyIcon = false
             )
         }
 
@@ -212,11 +220,21 @@ class TrucoViewModel : ViewModel() {
         val newScore = scores[playerId]
 
         var taunt: String? = null
-        if (oldScore == 0 && newScore > 0 && newScore < 12) {
+        var nanny = false
+
+        if (oldScore == 0 && (points == 1 || points == 2) && newScore < 12) {
+            taunt = "SEMPRE SALVANDO, OH, UMA MÃO MESMO!"
+            nanny = true
+            logMessage("🍼 ${players[playerId].name} salvou-se do zero! \"SEMPRE SALVANDO, OH, UMA MÃO MESMO!\"")
+        } else if (oldScore == 0 && newScore > 0 && newScore < 12) {
             taunt = "PENSO, NÉ!"
-            logMessage("💡 ${players[playerId].name}: \"PENSO, NÉ!\" (Salvou-se do zero!)")
+            logMessage("💡 ${players[playerId].name}: \"PENSO, NÉ!\"")
         }
-        if (newScore == 4) {
+
+        if (playerId == 2 && listOf(5, 8, 10, 11).contains(newScore)) {
+            taunt = "MARVADO!!!"
+            logMessage("💚 RICHARD: \"MARVADO!!!\" (Pegou tento ruim: $newScore)")
+        } else if (newScore == 4) {
             taunt = "KUAK!"
             logMessage("🐷 ${players[playerId].name}: \"KUAK!\"")
         } else if (listOf(5, 8, 10, 11).contains(newScore)) {
@@ -233,7 +251,7 @@ class TrucoViewModel : ViewModel() {
         }
 
         _state.update {
-            it.copy(scores = scores, resets = resets, activeTaunt = taunt)
+            it.copy(scores = scores, resets = resets, activeTaunt = taunt, showNannyIcon = nanny)
         }
     }
 
