@@ -223,7 +223,7 @@ class TrucoViewModel : ViewModel() {
         var nanny = false
 
         if (oldScore == 0 && (points == 1 || points == 2) && newScore < 12) {
-            taunt = "SEMPRE SALVANDO, OH, UMA MÃO MESMO!"
+            taunt = "SEMPRE SALVANDO, OH, É UMA MÃE MESMO!"
             nanny = true
             logMessage("🍼 ${players[playerId].name} salvou-se do zero! \"SEMPRE SALVANDO, OH, UMA MÃO MESMO!\"")
         } else if (oldScore == 0 && newScore > 0 && newScore < 12) {
@@ -436,7 +436,18 @@ class TrucoViewModel : ViewModel() {
 
     private fun logMessage(msg: String) {
         _state.update {
-            it.copy(gameLog = it.gameLog + msg)
+            it.copy(
+                gameLog = it.gameLog + msg,
+                currentAnnouncement = msg
+            )
+        }
+        viewModelScope.launch {
+            delay(2500)
+            _state.update { current ->
+                if (current.currentAnnouncement == msg) {
+                    current.copy(currentAnnouncement = null)
+                } else current
+            }
         }
     }
 }

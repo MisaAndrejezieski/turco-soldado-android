@@ -40,6 +40,7 @@ data class GameState(
     val showAllyHand: Boolean = false,
     val showNannyIcon: Boolean = false,
     val activeTaunt: String? = null,
+    val currentAnnouncement: String? = null,
     
     val gameLog: List<String> = listOf("Iniciando a partida de Truco Soldado...")
 )
